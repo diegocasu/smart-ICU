@@ -34,7 +34,8 @@ process_event_t TEMPERATURE_STOP_SAMPLING_EVENT;
  */
 PROCESS(temperature_sensor_process, "Temperature sensor process");
 
-PROCESS_THREAD(temperature_sensor_process, event, data) {
+PROCESS_THREAD(temperature_sensor_process, event, data)
+{
   static struct sensor temperature_sensor = {.sampling_interval = TEMPERATURE_SAMPLING_INTERVAL*CLOCK_SECOND};
   PROCESS_BEGIN();
 
@@ -45,8 +46,8 @@ PROCESS_THREAD(temperature_sensor_process, event, data) {
 
   while(true) {
     PROCESS_WAIT_EVENT_UNTIL(event == TEMPERATURE_START_SAMPLING_EVENT);
-    temperature_sensor.subscriber = (struct process *) data;
-    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s \n",
+    temperature_sensor.subscriber = (struct process *)data;
+    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s.\n",
              TEMPERATURE_SAMPLING_INTERVAL,
              temperature_sensor.subscriber->name);
 

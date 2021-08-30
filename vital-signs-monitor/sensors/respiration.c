@@ -34,7 +34,8 @@ process_event_t RESPIRATION_STOP_SAMPLING_EVENT;
  */
 PROCESS(respiration_sensor_process, "Respiration sensor process");
 
-PROCESS_THREAD(respiration_sensor_process, event, data) {
+PROCESS_THREAD(respiration_sensor_process, event, data)
+{
   static struct sensor respiration_sensor = {.sampling_interval = RESPIRATION_SAMPLING_INTERVAL*CLOCK_SECOND};
   PROCESS_BEGIN();
 
@@ -45,8 +46,8 @@ PROCESS_THREAD(respiration_sensor_process, event, data) {
 
   while(true) {
     PROCESS_WAIT_EVENT_UNTIL(event == RESPIRATION_START_SAMPLING_EVENT);
-    respiration_sensor.subscriber = (struct process *) data;
-    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s \n",
+    respiration_sensor.subscriber = (struct process *)data;
+    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s.\n",
              RESPIRATION_SAMPLING_INTERVAL,
              respiration_sensor.subscriber->name);
 

@@ -53,5 +53,5 @@
 #define OXYGEN_SATURATION_DEVIATION           10
 #define OXYGEN_SATURATION_UNIT                "%"
 
-#endif //SMART_ICU_SENSOR_CONSTANTS_H
+#endif /* SMART_ICU_SENSOR_CONSTANTS_H */
 /** @} */

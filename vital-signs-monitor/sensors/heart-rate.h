@@ -40,5 +40,5 @@ extern process_event_t HEART_RATE_STOP_SAMPLING_EVENT;
  */
 extern process_event_t HEART_RATE_SAMPLE_EVENT;
 
-#endif //SMART_ICU_HEART_RATE_H
+#endif /* SMART_ICU_HEART_RATE_H */
 /** @} */

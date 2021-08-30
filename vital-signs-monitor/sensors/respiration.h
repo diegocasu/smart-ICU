@@ -40,5 +40,5 @@ extern process_event_t RESPIRATION_STOP_SAMPLING_EVENT;
  */
 extern process_event_t RESPIRATION_SAMPLE_EVENT;
 
-#endif //SMART_ICU_RESPIRATION_H
+#endif /* SMART_ICU_RESPIRATION_H */
 /** @} */

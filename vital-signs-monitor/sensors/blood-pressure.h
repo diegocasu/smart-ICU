@@ -40,5 +40,5 @@ extern process_event_t BLOOD_PRESSURE_STOP_SAMPLING_EVENT;
  */
 extern process_event_t BLOOD_PRESSURE_SAMPLE_EVENT;
 
-#endif //SMART_ICU_BLOOD_PRESSURE_H
+#endif /* SMART_ICU_BLOOD_PRESSURE_H */
 /** @} */

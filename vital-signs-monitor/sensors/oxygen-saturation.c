@@ -34,7 +34,8 @@ process_event_t OXYGEN_SATURATION_STOP_SAMPLING_EVENT;
  */
 PROCESS(oxygen_saturation_sensor_process, "Oxygen saturation sensor process");
 
-PROCESS_THREAD(oxygen_saturation_sensor_process, event, data) {
+PROCESS_THREAD(oxygen_saturation_sensor_process, event, data)
+{
   static struct sensor oxygen_saturation_sensor = {.sampling_interval = OXYGEN_SATURATION_SAMPLING_INTERVAL*CLOCK_SECOND};
   PROCESS_BEGIN();
 
@@ -45,8 +46,8 @@ PROCESS_THREAD(oxygen_saturation_sensor_process, event, data) {
 
   while(true) {
     PROCESS_WAIT_EVENT_UNTIL(event == OXYGEN_SATURATION_START_SAMPLING_EVENT);
-    oxygen_saturation_sensor.subscriber = (struct process *) data;
-    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s \n",
+    oxygen_saturation_sensor.subscriber = (struct process *)data;
+    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s.\n",
              OXYGEN_SATURATION_SAMPLING_INTERVAL,
              oxygen_saturation_sensor.subscriber->name);
 

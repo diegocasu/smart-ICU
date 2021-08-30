@@ -40,5 +40,5 @@ extern process_event_t TEMPERATURE_STOP_SAMPLING_EVENT;
  */
 extern process_event_t TEMPERATURE_SAMPLE_EVENT;
 
-#endif //SMART_ICU_TEMPERATURE_H
+#endif /* SMART_ICU_TEMPERATURE_H */
 /** @} */

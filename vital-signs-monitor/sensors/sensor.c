@@ -15,7 +15,8 @@
 
 /*---------------------------------------------------------------------------*/
 int
-sensor_generate_sample(int starting_sample, int max_deviation, int lower_bound, int upper_bound) {
+sensor_generate_sample(int starting_sample, int max_deviation, int lower_bound, int upper_bound)
+{
   int deviation, new_sample;
 
   deviation = prng_rand((-1)*max_deviation, max_deviation);

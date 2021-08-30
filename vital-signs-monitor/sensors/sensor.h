@@ -53,5 +53,5 @@ struct sensor {
  */
 int sensor_generate_sample(int starting_sample, int max_deviation, int lower_bound, int upper_bound);
 
-#endif //SMART_ICU_SENSOR_H
+#endif /* SMART_ICU_SENSOR_H */
 /** @} */

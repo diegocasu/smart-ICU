@@ -34,7 +34,8 @@ process_event_t BLOOD_PRESSURE_STOP_SAMPLING_EVENT;
  */
 PROCESS(blood_pressure_sensor_process, "Blood pressure sensor process");
 
-PROCESS_THREAD(blood_pressure_sensor_process, event, data) {
+PROCESS_THREAD(blood_pressure_sensor_process, event, data)
+{
   static struct sensor blood_pressure_sensor = {.sampling_interval = BLOOD_PRESSURE_SAMPLING_INTERVAL*CLOCK_SECOND};
   PROCESS_BEGIN();
 
@@ -45,8 +46,8 @@ PROCESS_THREAD(blood_pressure_sensor_process, event, data) {
 
   while(true) {
     PROCESS_WAIT_EVENT_UNTIL(event == BLOOD_PRESSURE_START_SAMPLING_EVENT);
-    blood_pressure_sensor.subscriber = (struct process *) data;
-    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s \n",
+    blood_pressure_sensor.subscriber = (struct process *)data;
+    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s.\n",
              BLOOD_PRESSURE_SAMPLING_INTERVAL,
              blood_pressure_sensor.subscriber->name);
 

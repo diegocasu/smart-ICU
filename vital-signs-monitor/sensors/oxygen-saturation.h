@@ -40,5 +40,5 @@ extern process_event_t OXYGEN_SATURATION_STOP_SAMPLING_EVENT;
  */
 extern process_event_t OXYGEN_SATURATION_SAMPLE_EVENT;
 
-#endif //SMART_ICU_OXYGEN_SATURATION_H
+#endif /* SMART_ICU_OXYGEN_SATURATION_H */
 /** @} */

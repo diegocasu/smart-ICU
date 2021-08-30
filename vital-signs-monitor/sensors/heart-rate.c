@@ -34,7 +34,8 @@ process_event_t HEART_RATE_STOP_SAMPLING_EVENT;
  */
 PROCESS(heart_rate_sensor_process, "Heart rate sensor process");
 
-PROCESS_THREAD(heart_rate_sensor_process, event, data) {
+PROCESS_THREAD(heart_rate_sensor_process, event, data)
+{
   static struct sensor heart_rate_sensor = {.sampling_interval = HEART_RATE_SAMPLING_INTERVAL*CLOCK_SECOND};
   PROCESS_BEGIN();
 
@@ -45,8 +46,8 @@ PROCESS_THREAD(heart_rate_sensor_process, event, data) {
 
   while(true) {
     PROCESS_WAIT_EVENT_UNTIL(event == HEART_RATE_START_SAMPLING_EVENT);
-    heart_rate_sensor.subscriber = (struct process *) data;
-    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s \n",
+    heart_rate_sensor.subscriber = (struct process *)data;
+    LOG_INFO("Starting sampling with interval %d s. Subscribed process: %s.\n",
              HEART_RATE_SAMPLING_INTERVAL,
              heart_rate_sensor.subscriber->name);
 

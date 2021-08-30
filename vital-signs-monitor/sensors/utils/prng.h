@@ -37,6 +37,6 @@ void prng_init(unsigned int seed);
  */
 int prng_rand(int min, int max);
 
-#endif //SMART_ICU_PRNG_H
+#endif /* SMART_ICU_PRNG_H */
 /** @} */
 
