@@ -1,6 +1,6 @@
 /**
  * \file
- *         Temperature sensor simulator implementation
+ *         Implementation of the temperature sensor simulator
  * \author
  *         Diego Casu
  */

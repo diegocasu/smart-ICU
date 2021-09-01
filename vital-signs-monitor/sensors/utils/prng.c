@@ -19,7 +19,6 @@ prng_init(unsigned int seed)
 {
   srand(seed);
 }
-
 /*---------------------------------------------------------------------------*/
 int
 prng_rand(int min, int max)

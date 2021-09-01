@@ -1,6 +1,6 @@
 /**
  * \file
- *         Blood pressure sensor simulator implementation
+ *         Implementation of the blood pressure sensor simulator
  * \author
  *         Diego Casu
  */

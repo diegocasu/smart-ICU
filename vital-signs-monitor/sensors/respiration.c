@@ -1,6 +1,6 @@
 /**
  * \file
- *         Respiration sensor simulator implementation
+ *         Implementation of the respiration sensor simulator
  * \author
  *         Diego Casu
  */

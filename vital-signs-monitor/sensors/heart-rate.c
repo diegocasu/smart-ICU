@@ -1,6 +1,6 @@
 /**
  * \file
- *         Heart rate sensor simulator implementation
+ *         Implementation of the heart rate sensor simulator
  * \author
  *         Diego Casu
  */

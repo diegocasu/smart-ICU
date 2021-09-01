@@ -1,6 +1,6 @@
 /**
  * \file
- *         Oxygen saturation sensor simulator implementation
+ *         Implementation of the oxygen saturation sensor simulator
  * \author
  *         Diego Casu
  */
