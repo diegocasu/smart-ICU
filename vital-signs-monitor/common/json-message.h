@@ -32,6 +32,7 @@ void json_message_device_registration(char *message_buffer, size_t size, char *m
  * \param message_buffer   A pointer to the buffer that will store the message.
  * \param size             The size of the buffer.
  * \param monitor_id       The ID of the vital signs monitor.
+ *                         If NULL, it is not inserted in the message.
  * \param patient_id       The ID of the patient.
  *
  *                         The function generates a patient registration message for

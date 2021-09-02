@@ -34,7 +34,13 @@ void
 json_message_patient_registration(char *message_buffer, size_t size, char *monitor_id, char *patient_id)
 {
   clear_buffer(message_buffer, size);
-  snprintf(message_buffer, size, "{\"monitorID\": \"%s\", \"patientID\": \"%s\"}", monitor_id, patient_id);
+
+  if(monitor_id != NULL) {
+    snprintf(message_buffer, size, "{\"monitorID\": \"%s\", \"patientID\": \"%s\"}", monitor_id, patient_id);
+    return;
+  }
+
+  snprintf(message_buffer, size, "{\"patientID\": \"%s\"}", patient_id);
 }
 /*---------------------------------------------------------------------------*/
 void
