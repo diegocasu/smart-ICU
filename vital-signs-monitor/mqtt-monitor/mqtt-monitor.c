@@ -18,20 +18,14 @@
 #include <stdio.h>
 #include "contiki.h"
 #include "os/sys/log.h"
-#include "os/sys/node-id.h"
 #include "os/net/ipv6/uiplib.h"
 #include "os/net/app-layer/mqtt/mqtt.h"
 #include "os/dev/serial-line.h"
 #include "os/dev/button-hal.h"
+#include "../common/sensors-cmd.h"
 #include "../common/json-message.h"
 #include "../common/alarm.h"
 #include "../common/alarm-constants.h"
-#include "../sensors/utils/prng.h"
-#include "../sensors/heart-rate.h"
-#include "../sensors/blood-pressure.h"
-#include "../sensors/temperature.h"
-#include "../sensors/respiration.h"
-#include "../sensors/oxygen-saturation.h"
 #include "./utils/mqtt-output-queue.h"
 #include "./utils/mqtt-monitor-constants.h"
 
@@ -98,26 +92,6 @@ struct mqtt_monitor {
 
 static struct mqtt_monitor monitor;
 
-/*---------------------------------------------------------------------------*/
-/**
- * \brief         Check if an event is a notification of a new sample
- *                sent by a sensor process.
- * \param event   The event to be checked.
- * \return        true if the event is a notification of a new sample,
- *                false otherwise.
- */
-static bool
-sensor_sample_event(process_event_t event)
-{
-  if(event == HEART_RATE_SAMPLE_EVENT
-     || event == BLOOD_PRESSURE_SAMPLE_EVENT
-     || event == OXYGEN_SATURATION_SAMPLE_EVENT
-     || event == RESPIRATION_SAMPLE_EVENT
-     || event == TEMPERATURE_SAMPLE_EVENT) {
-    return true;
-  }
-  return false;
-}
 /*---------------------------------------------------------------------------*/
 /**
  * \brief                 Check if a sample should trigger an alarm.
@@ -239,59 +213,6 @@ publish(char *topic, char* output_buffer)
   } else {
     LOG_INFO("The output queue is full. Discarding the message.\n");
   }
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief   Start the processes simulating the sensors.
- */
-static void
-start_sensor_processes(void)
-{
-  prng_init(node_id);
-  process_start(&heart_rate_sensor_process, NULL);
-  process_start(&blood_pressure_sensor_process, NULL);
-  process_start(&temperature_sensor_process, NULL);
-  process_start(&respiration_sensor_process, NULL);
-  process_start(&oxygen_saturation_sensor_process, NULL);
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief   Start the sampling activity of the processes simulating the sensors.
- */
-static void
-start_sensor_sampling(void)
-{
-  process_post(&heart_rate_sensor_process, HEART_RATE_START_SAMPLING_EVENT, &mqtt_vital_signs_monitor);
-  process_post(&blood_pressure_sensor_process, BLOOD_PRESSURE_START_SAMPLING_EVENT, &mqtt_vital_signs_monitor);
-  process_post(&temperature_sensor_process, TEMPERATURE_START_SAMPLING_EVENT, &mqtt_vital_signs_monitor);
-  process_post(&respiration_sensor_process, RESPIRATION_START_SAMPLING_EVENT, &mqtt_vital_signs_monitor);
-  process_post(&oxygen_saturation_sensor_process, OXYGEN_SATURATION_START_SAMPLING_EVENT, &mqtt_vital_signs_monitor);
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief   Stop the sampling activity of the processes simulating the sensors.
- */
-static void
-stop_sensor_sampling(void)
-{
-  process_post(&heart_rate_sensor_process, HEART_RATE_STOP_SAMPLING_EVENT, NULL);
-  process_post(&blood_pressure_sensor_process, BLOOD_PRESSURE_STOP_SAMPLING_EVENT, NULL);
-  process_post(&temperature_sensor_process, TEMPERATURE_STOP_SAMPLING_EVENT, NULL);
-  process_post(&respiration_sensor_process, RESPIRATION_STOP_SAMPLING_EVENT, NULL);
-  process_post(&oxygen_saturation_sensor_process, OXYGEN_SATURATION_STOP_SAMPLING_EVENT, NULL);
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief   Stop the processes simulating the sensors.
- */
-static void
-stop_sensor_processes(void)
-{
-  process_exit(&heart_rate_sensor_process);
-  process_exit(&blood_pressure_sensor_process);
-  process_exit(&temperature_sensor_process);
-  process_exit(&respiration_sensor_process);
-  process_exit(&oxygen_saturation_sensor_process);
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -535,7 +456,7 @@ handle_state_subscribed(void)
   publish(monitor.cmd_topics.device_registration, monitor.output_buffers.device_registration);
 
   /* Start the sensor processes (without starting the sampling activity). */
-  start_sensor_processes();
+  sensors_cmd_start_processes();
 
   /* Initialize the alarm system. */
   alarm_init(&monitor.alarm);
@@ -572,7 +493,7 @@ handle_new_patient_ID(char *patient_id)
   publish(monitor.cmd_topics.patient_registration, monitor.output_buffers.patient_registration);
 
   /* Start the sampling activity of the sensors. */
-  start_sensor_sampling();
+  sensors_cmd_start_sampling(&mqtt_vital_signs_monitor);
 
   monitor.state = MQTT_MONITOR_STATE_OPERATIONAL;
 }
@@ -612,7 +533,7 @@ handle_button_press(button_hal_button_t *button)
     mqtt_output_queue_init(&monitor.mqtt_module.output_queue);
 
     memset(monitor.patient_id, 0, MQTT_MONITOR_PATIENT_ID_LENGTH);
-    stop_sensor_sampling();
+    sensors_cmd_stop_sampling();
 
     monitor.state = MQTT_MONITOR_STATE_WAITING_PATIENT_ID;
     LOG_INFO("Waiting for a new patient ID on the serial line.\n");
@@ -634,35 +555,35 @@ handle_sensor_sample(process_event_t event, int sample)
   int min_threshold;
   int max_threshold;
 
-  if(event == HEART_RATE_SAMPLE_EVENT) {
+  if(sensors_cmd_heart_rate_sample_event(event)) {
     sensor = "heart rate";
     min_threshold = ALARM_HEART_RATE_MIN_THRESHOLD;
     max_threshold = ALARM_HEART_RATE_MAX_THRESHOLD;
     json_message_heart_rate_sample(monitor.output_buffers.heart_rate, MQTT_MONITOR_OUTPUT_BUFFER_SIZE, sample);
     publish(monitor.telemetry_topics.heart_rate, monitor.output_buffers.heart_rate);
 
-  } else if(event == BLOOD_PRESSURE_SAMPLE_EVENT) {
+  } else if(sensors_cmd_blood_pressure_sample_event(event)) {
     sensor = "blood pressure";
     min_threshold = ALARM_BLOOD_PRESSURE_MIN_THRESHOLD;
     max_threshold = ALARM_BLOOD_PRESSURE_MAX_THRESHOLD;
     json_message_blood_pressure_sample(monitor.output_buffers.blood_pressure, MQTT_MONITOR_OUTPUT_BUFFER_SIZE, sample);
     publish(monitor.telemetry_topics.blood_pressure, monitor.output_buffers.blood_pressure);
 
-  } else if(event == OXYGEN_SATURATION_SAMPLE_EVENT) {
+  } else if(sensors_cmd_oxygen_saturation_sample_event(event)) {
     sensor = "oxygen saturation";
     min_threshold = ALARM_OXYGEN_SATURATION_MIN_THRESHOLD;
     max_threshold = ALARM_OXYGEN_SATURATION_MAX_THRESHOLD;
     json_message_oxygen_saturation_sample(monitor.output_buffers.oxygen_saturation, MQTT_MONITOR_OUTPUT_BUFFER_SIZE, sample);
     publish(monitor.telemetry_topics.oxygen_saturation, monitor.output_buffers.oxygen_saturation);
 
-  } else if(event == RESPIRATION_SAMPLE_EVENT) {
+  } else if(sensors_cmd_respiration_sample_event(event)) {
     sensor = "respiration";
     min_threshold = ALARM_RESPIRATION_MIN_THRESHOLD;
     max_threshold = ALARM_RESPIRATION_MAX_THRESHOLD;
     json_message_respiration_sample(monitor.output_buffers.respiration, MQTT_MONITOR_OUTPUT_BUFFER_SIZE, sample);
     publish(monitor.telemetry_topics.respiration, monitor.output_buffers.respiration);
 
-  } else if(event == TEMPERATURE_SAMPLE_EVENT) {
+  } else if(sensors_cmd_temperature_sample_event(event)) {
     sensor = "temperature";
     min_threshold = ALARM_TEMPERATURE_MIN_THRESHOLD;
     max_threshold = ALARM_TEMPERATURE_MAX_THRESHOLD;
@@ -718,8 +639,8 @@ finish_monitor()
 {
   etimer_stop(&monitor.state_check_timer);
   ctimer_stop(&monitor.mqtt_module.output_queue_timer);
-  stop_sensor_sampling();
-  stop_sensor_processes();
+  sensors_cmd_stop_sampling();
+  sensors_cmd_stop_processes();
   alarm_stop(&monitor.alarm);
 }
 /*---------------------------------------------------------------------------*/
@@ -791,7 +712,7 @@ PROCESS_THREAD(mqtt_vital_signs_monitor, event, data)
       continue;
     }
 
-    if(sensor_sample_event(event) && monitor.state == MQTT_MONITOR_STATE_OPERATIONAL) {
+    if(sensors_cmd_sample_event(event) && monitor.state == MQTT_MONITOR_STATE_OPERATIONAL) {
       handle_sensor_sample(event, *((int *)data));
       continue;
     }
