@@ -6,6 +6,7 @@ SMART_ICU = ../..
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
+# Include the MQTT implementation.
 MODULES += $(CONTIKI_NG_APP_LAYER_DIR)/mqtt
 
 MODULES_REL += $(SMART_ICU)/vital-signs-monitor/sensors

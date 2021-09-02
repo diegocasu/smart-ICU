@@ -42,26 +42,25 @@ PROCESS_NAME(mqtt_vital_signs_monitor);
 
 /* Structure representing an MQTT vital signs monitor. */
 struct mqtt_monitor {
+  char monitor_id[MQTT_MONITOR_ID_LENGTH];
   struct alarm_system alarm;
-
-  /* ID of the patient currently attached to the monitor. */
-  char patient_id[MQTT_MONITOR_PATIENT_ID_LENGTH];
 
   /* Internal state. */
   clock_time_t state_check_interval;
   struct etimer state_check_timer;
   uint8_t state;
 
-  /* Management of the MQTT connection. */
+  /* ID of the patient currently attached to the monitor. */
+  char patient_id[MQTT_MONITOR_PATIENT_ID_LENGTH];
+
+  /*
+   * Management of the MQTT connection and of the MQTT message output queue.
+   * The latter is not implemented by default in the Contiki module
+   * (the Contiki MQTT "output queue" has only space for one message at a time).
+   */
   struct mqtt_module {
-    char monitor_id[MQTT_MONITOR_MONITOR_ID_LENGTH];
     struct mqtt_connection connection;
     mqtt_status_t status;
-
-    /*
-     * Management of the message output queue.
-     * An output queue is not implemented in the MQTT module of Contiki.
-     */
     struct mqtt_output_queue output_queue;
     struct ctimer output_queue_timer;
     clock_time_t output_queue_timer_interval;
@@ -170,17 +169,17 @@ static void
 init_topics(void)
 {
   /* Command topics. */
-  snprintf(monitor.cmd_topics.alarm_state, MQTT_MONITOR_TOPIC_MAX_LENGTH, "cmd/smartICU/%s/patient-state/alarm-state", monitor.mqtt_module.monitor_id);
-  strcpy(monitor.cmd_topics.device_registration, "cmd/smartICU/collector/device-registration");
-  strcpy(monitor.cmd_topics.patient_registration, "cmd/smartICU/collector/patient-registration");
+  snprintf(monitor.cmd_topics.alarm_state, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_CMD_TOPIC_ALARM_STATE, monitor.monitor_id);
+  snprintf(monitor.cmd_topics.device_registration, MQTT_MONITOR_TOPIC_MAX_LENGTH, "%s", MQTT_MONITOR_CMD_TOPIC_DEVICE_REGISTRATION);
+  snprintf(monitor.cmd_topics.patient_registration, MQTT_MONITOR_TOPIC_MAX_LENGTH, "%s",MQTT_MONITOR_CMD_TOPIC_PATIENT_REGISTRATION);
 
   /* Telemetry topics. */
-  snprintf(monitor.telemetry_topics.heart_rate, MQTT_MONITOR_TOPIC_MAX_LENGTH, "telemetry/smartICU/%s/patient-state/heart-rate", monitor.mqtt_module.monitor_id);
-  snprintf(monitor.telemetry_topics.blood_pressure, MQTT_MONITOR_TOPIC_MAX_LENGTH, "telemetry/smartICU/%s/patient-state/blood-pressure", monitor.mqtt_module.monitor_id);
-  snprintf(monitor.telemetry_topics.temperature, MQTT_MONITOR_TOPIC_MAX_LENGTH, "telemetry/smartICU/%s/patient-state/temperature", monitor.mqtt_module.monitor_id);
-  snprintf(monitor.telemetry_topics.respiration, MQTT_MONITOR_TOPIC_MAX_LENGTH, "telemetry/smartICU/%s/patient-state/respiration", monitor.mqtt_module.monitor_id);
-  snprintf(monitor.telemetry_topics.oxygen_saturation, MQTT_MONITOR_TOPIC_MAX_LENGTH, "telemetry/smartICU/%s/patient-state/oxygen-saturation", monitor.mqtt_module.monitor_id);
-  snprintf(monitor.telemetry_topics.alarm_state, MQTT_MONITOR_TOPIC_MAX_LENGTH, "telemetry/smartICU/%s/patient-state/alarm-state", monitor.mqtt_module.monitor_id);
+  snprintf(monitor.telemetry_topics.heart_rate, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_TELEMETRY_TOPIC_HEART_RATE, monitor.monitor_id);
+  snprintf(monitor.telemetry_topics.blood_pressure, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_TELEMETRY_TOPIC_BLOOD_PRESSURE, monitor.monitor_id);
+  snprintf(monitor.telemetry_topics.temperature, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_TELEMETRY_TOPIC_TEMPERATURE, monitor.monitor_id);
+  snprintf(monitor.telemetry_topics.respiration, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_TELEMETRY_TOPIC_RESPIRATION, monitor.monitor_id);
+  snprintf(monitor.telemetry_topics.oxygen_saturation, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_TELEMETRY_TOPIC_OXYGEN_SATURATION, monitor.monitor_id);
+  snprintf(monitor.telemetry_topics.alarm_state, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_TELEMETRY_TOPIC_ALARM_STATE, monitor.monitor_id);
 
   LOG_DBG("Command alarm state topic: %s\n", monitor.cmd_topics.alarm_state);
   LOG_DBG("Command device registration topic: %s\n", monitor.cmd_topics.device_registration);
@@ -426,7 +425,7 @@ static void
 handle_state_started(void)
 {
   if(network_ready()) {
-    LOG_INFO("Connected to the network.");
+    LOG_INFO("Connected to the network. ");
     LOG_INFO_("Global address: ");
     LOG_INFO_6ADDR(&(uip_ds6_get_global(ADDR_PREFERRED)->ipaddr));
     LOG_INFO_(". Link local address: ");
@@ -455,17 +454,17 @@ static bool
 handle_state_network_ready(void)
 {
   /* Initialize the monitor ID as the global IPv6 address. */
-  uiplib_ipaddr_snprint(monitor.mqtt_module.monitor_id,
-                        MQTT_MONITOR_MONITOR_ID_LENGTH,
+  uiplib_ipaddr_snprint(monitor.monitor_id,
+                        MQTT_MONITOR_ID_LENGTH,
                         &(uip_ds6_get_global(ADDR_PREFERRED)->ipaddr));
 
   /* Initialize MQTT engine. */
   mqtt_register(&monitor.mqtt_module.connection,
                 &mqtt_vital_signs_monitor,
-                monitor.mqtt_module.monitor_id,
+                monitor.monitor_id,
                 handle_mqtt_event,
                 MQTT_MONITOR_MAX_TCP_SEGMENT_SIZE);
-  LOG_INFO("MQTT engine initialized. Monitor id: %s.\n", monitor.mqtt_module.monitor_id);
+  LOG_INFO("MQTT engine initialized. Monitor id: %s.\n", monitor.monitor_id);
 
   /* Connect to the broker. */
   LOG_INFO("Connecting to the MQTT broker at %s, %d.\n", MQTT_MONITOR_BROKER_IP_ADDRESS, MQTT_MONITOR_BROKER_PORT);
@@ -530,7 +529,9 @@ static void
 handle_state_subscribed(void)
 {
   /* Register the monitor sending a message to the collector. */
-  json_message_device_registration(monitor.output_buffers.device_registration, MQTT_MONITOR_OUTPUT_BUFFER_SIZE,  monitor.mqtt_module.monitor_id);
+  json_message_device_registration(monitor.output_buffers.device_registration,
+                                   MQTT_MONITOR_OUTPUT_BUFFER_SIZE,
+                                   monitor.monitor_id);
   publish(monitor.cmd_topics.device_registration, monitor.output_buffers.device_registration);
 
   /* Start the sensor processes (without starting the sampling activity). */
@@ -566,7 +567,7 @@ handle_new_patient_ID(char *patient_id)
   /* Register the new patient ID sending a message to the collector. */
   json_message_patient_registration(monitor.output_buffers.patient_registration,
                                     MQTT_MONITOR_OUTPUT_BUFFER_SIZE,
-                                    monitor.mqtt_module.monitor_id,
+                                    monitor.monitor_id,
                                     monitor.patient_id);
   publish(monitor.cmd_topics.patient_registration, monitor.output_buffers.patient_registration);
 
