@@ -55,7 +55,7 @@ struct coap_monitor {
   clock_time_t network_check_interval;
   struct etimer network_check_timer;
 
-  /* Management of device registration messages. */
+  /* Management of monitor registration messages. */
   coap_endpoint_t collector_endpoint;
   coap_message_t registration_request;
   char output_buffer[COAP_MONITOR_OUTPUT_BUFFER_SIZE];
@@ -85,11 +85,11 @@ alarming_sample(int min_threshold, int max_threshold, int sample)
 }
 /*---------------------------------------------------------------------------*/
 /**
- * \brief    Check if the device is correctly connected to the network.
- * \return   true if the device is correctly connected to the network,
+ * \brief    Check if the monitor is correctly connected to the network.
+ * \return   true if the monitor is correctly connected to the network,
  *           false otherwise.
  *
- *           The function checks if the device is correctly connected
+ *           The function checks if the monitor is correctly connected
  *           to the network, namely if it has a global address
  *           and a default route.
  */
@@ -106,7 +106,7 @@ network_ready(void)
  * \brief   Handle the COAP_MONITOR_STATE_STARTED state.
  *
  *          The function handles the COAP_MONITOR_STATE_STARTED state,
- *          checking if the device is correctly connected to the network.
+ *          checking if the monitor is correctly connected to the network.
  *          If the latter is true, it changes the monitor state
  *          to COAP_MONITOR_STATE_NETWORK_READY and stops the
  *          <code>network_check_timer</code>.
@@ -132,7 +132,7 @@ handle_state_started(void)
  * \brief    Handle the COAP_MONITOR_STATE_NETWORK_READY state.
  *
  *           The function handles the COAP_MONITOR_STATE_NETWORK_READY state,
- *           initializing the monitor ID and preparing the device registration
+ *           initializing the monitor ID and preparing the monitor registration
  *           message to send to the collector. The latter is placed in
  *           <code>monitor.output_buffer</code>, ready to be sent via
  *           <code>COAP_BLOCKING_REQUEST()</code>.
@@ -147,23 +147,23 @@ handle_state_network_ready()
 
   /* Prepare the registration request to send to the collector. */
   coap_init_message(&monitor.registration_request, COAP_TYPE_CON, COAP_POST, 0);
-  coap_set_header_uri_path(&monitor.registration_request, COAP_MONITOR_COLLECTOR_REGISTERED_DEVICES_RESOURCE);
+  coap_set_header_uri_path(&monitor.registration_request, COAP_MONITOR_COLLECTOR_REGISTERED_MONITORS_RESOURCE);
 
-  json_message_device_registration(monitor.output_buffer, COAP_MONITOR_OUTPUT_BUFFER_SIZE, monitor.monitor_id);
+  json_message_monitor_registration(monitor.output_buffer, COAP_MONITOR_OUTPUT_BUFFER_SIZE, monitor.monitor_id);
   coap_set_payload(&monitor.registration_request, monitor.output_buffer, sizeof(monitor.output_buffer) - 1);
 
   LOG_INFO("Sending a POST with payload %s to the endpoint %s/%s.\n",
            monitor.output_buffer,
-           COAP_MONITOR_COLLECTOR_REGISTERED_DEVICES_RESOURCE,
+           COAP_MONITOR_COLLECTOR_REGISTERED_MONITORS_RESOURCE,
            COAP_MONITOR_COLLECTOR_ENDPOINT);
 }
 /*---------------------------------------------------------------------------*/
 /**
  * \brief   Handle the CoAP message sent by the collector in response to
- *          the device registration message.
+ *          the monitor registration message.
  *
  *          The function handles the CoAP message sent by the collector
- *          in response to the device registration message. More in details:<br>
+ *          in response to the monitor registration message. More in details:<br>
  *          1) if the request fails due to a timeout or the response carries a
  *             response code different from 2.01, the function changes the monitor
  *             state to COAP_MONITOR_STATE_REGISTRATION_FAILED;<br>
@@ -373,7 +373,7 @@ finish_monitor()
  * 2) commands able to trigger the alarm system can be received.
  * The monitor requires a patient ID in order to be fully operational, which can
  * be passed via the serial line at startup. The patient ID can be reset and
- * re-inserted pressing the button of the device for at least 10 seconds.
+ * re-inserted pressing the button of the monitor for at least 10 seconds.
  * If the alarm system is triggered, the alarm state can be turned off by
  * pressing the same button for at least 5 seconds.
  */

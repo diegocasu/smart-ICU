@@ -17,15 +17,15 @@
 #define SMART_ICU_JSON_MESSAGE_H
 
 /**
- * \brief                  Generate a device registration message.
+ * \brief                  Generate a monitor registration message.
  * \param message_buffer   A pointer to the buffer that will store the message.
  * \param size             The size of the buffer.
  * \param monitor_id       The ID of the vital signs monitor.
  *
- *                         The function generates a device registration message for
+ *                         The function generates a monitor registration message for
  *                         the specified vital signs monitor.
  */
-void json_message_device_registration(char *message_buffer, size_t size, char *monitor_id);
+void json_message_monitor_registration(char *message_buffer, size_t size, char *monitor_id);
 
 /**
  * \brief                  Generate a patient registration message.

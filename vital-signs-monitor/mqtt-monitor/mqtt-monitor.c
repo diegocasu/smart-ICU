@@ -63,7 +63,7 @@ struct mqtt_monitor {
   /* Buffers used to store the topics regarding commands. */
   struct cmd_topics {
     char patient_registration[MQTT_MONITOR_TOPIC_MAX_LENGTH];
-    char device_registration[MQTT_MONITOR_TOPIC_MAX_LENGTH];
+    char monitor_registration[MQTT_MONITOR_TOPIC_MAX_LENGTH];
     char alarm_state[MQTT_MONITOR_TOPIC_MAX_LENGTH];
   } cmd_topics;
 
@@ -80,7 +80,7 @@ struct mqtt_monitor {
   /* Buffers used to store the output messages. */
   struct output_buffers {
     char patient_registration[MQTT_MONITOR_OUTPUT_BUFFER_SIZE];
-    char device_registration[MQTT_MONITOR_OUTPUT_BUFFER_SIZE];
+    char monitor_registration[MQTT_MONITOR_OUTPUT_BUFFER_SIZE];
     char oxygen_saturation[MQTT_MONITOR_OUTPUT_BUFFER_SIZE];
     char blood_pressure[MQTT_MONITOR_OUTPUT_BUFFER_SIZE];
     char temperature[MQTT_MONITOR_OUTPUT_BUFFER_SIZE];
@@ -114,11 +114,11 @@ alarming_sample(int min_threshold, int max_threshold, int sample)
 }
 /*---------------------------------------------------------------------------*/
 /**
- * \brief    Check if the device is correctly connected to the network.
- * \return   true if the device is correctly connected to the network,
+ * \brief    Check if the monitor is correctly connected to the network.
+ * \return   true if the monitor is correctly connected to the network,
  *           false otherwise.
  *
- *           The function checks if the device is correctly connected
+ *           The function checks if the monitor is correctly connected
  *           to the network, namely if it has a global address
  *           and a default route.
  */
@@ -144,7 +144,7 @@ init_topics(void)
 {
   /* Command topics. */
   snprintf(monitor.cmd_topics.alarm_state, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_CMD_TOPIC_ALARM_STATE, monitor.monitor_id);
-  snprintf(monitor.cmd_topics.device_registration, MQTT_MONITOR_TOPIC_MAX_LENGTH, "%s", MQTT_MONITOR_CMD_TOPIC_DEVICE_REGISTRATION);
+  snprintf(monitor.cmd_topics.monitor_registration, MQTT_MONITOR_TOPIC_MAX_LENGTH, "%s", MQTT_MONITOR_CMD_TOPIC_MONITOR_REGISTRATION);
   snprintf(monitor.cmd_topics.patient_registration, MQTT_MONITOR_TOPIC_MAX_LENGTH, "%s",MQTT_MONITOR_CMD_TOPIC_PATIENT_REGISTRATION);
 
   /* Telemetry topics. */
@@ -156,7 +156,7 @@ init_topics(void)
   snprintf(monitor.telemetry_topics.alarm_state, MQTT_MONITOR_TOPIC_MAX_LENGTH, MQTT_MONITOR_TELEMETRY_TOPIC_ALARM_STATE, monitor.monitor_id);
 
   LOG_DBG("Command alarm state topic: %s\n", monitor.cmd_topics.alarm_state);
-  LOG_DBG("Command device registration topic: %s\n", monitor.cmd_topics.device_registration);
+  LOG_DBG("Command monitor registration topic: %s\n", monitor.cmd_topics.monitor_registration);
   LOG_DBG("Command patient registration topic: %s\n", monitor.cmd_topics.patient_registration);
   LOG_DBG("Telemetry heart rate topic: %s\n", monitor.telemetry_topics.heart_rate);
   LOG_DBG("Telemetry blood pressure topic: %s\n", monitor.telemetry_topics.blood_pressure);
@@ -259,7 +259,7 @@ handle_mqtt_event_publish(struct mqtt_message *msg)
   LOG_INFO("Received %s in the topic %s.\n", msg->payload_chunk, msg->topic);
 
   if(monitor.state != MQTT_MONITOR_STATE_OPERATIONAL) {
-    LOG_INFO("Discarding the MQTT message. The device is not in an operating state.\n");
+    LOG_INFO("Discarding the MQTT message. The monitor is not in an operating state.\n");
     return;
   }
 
@@ -338,7 +338,7 @@ handle_mqtt_event(struct mqtt_connection *m, mqtt_event_t event, void *data)
  * \brief   Handle the MQTT_MONITOR_STATE_STARTED state.
  *
  *          The function handles the MQTT_MONITOR_STATE_STARTED state,
- *          checking if the device is correctly connected to the network.
+ *          checking if the monitor is correctly connected to the network.
  *          If the latter is true, it changes the monitor state
  *          to MQTT_MONITOR_STATE_NETWORK_READY.
  */
@@ -450,10 +450,10 @@ static void
 handle_state_subscribed(void)
 {
   /* Register the monitor sending a message to the collector. */
-  json_message_device_registration(monitor.output_buffers.device_registration,
-                                   MQTT_MONITOR_OUTPUT_BUFFER_SIZE,
-                                   monitor.monitor_id);
-  publish(monitor.cmd_topics.device_registration, monitor.output_buffers.device_registration);
+  json_message_monitor_registration(monitor.output_buffers.monitor_registration,
+                                    MQTT_MONITOR_OUTPUT_BUFFER_SIZE,
+                                    monitor.monitor_id);
+  publish(monitor.cmd_topics.monitor_registration, monitor.output_buffers.monitor_registration);
 
   /* Start the sensor processes (without starting the sampling activity). */
   sensors_cmd_start_processes();
@@ -653,7 +653,7 @@ finish_monitor()
  * 2) receives commands able to trigger the alarm system.
  * The monitor requires a patient ID in order to be fully operational, which can
  * be passed via the serial line at startup. The patient ID can be reset and
- * re-inserted pressing the button of the device for at least 10 seconds.
+ * re-inserted pressing the button of the monitor for at least 10 seconds.
  * If the alarm system is triggered, the alarm state can be turned off by
  * pressing the same button for at least 5 seconds.
  */

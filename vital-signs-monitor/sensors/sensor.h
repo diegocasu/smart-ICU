@@ -10,7 +10,7 @@
  * @{
  *
  * The sensor module provides a representation of generic simulated sensors inside a
- * smart ICU device and functions to generate new samples inside given intervals.
+ * smart ICU monitor and functions to generate new samples inside given intervals.
  * A generic sensor implementation must define a process simulating the sampling activity;
  * in particular, this process must:<br>
  * 1) start generating samples periodically when it receives a start event.
@@ -28,7 +28,7 @@
 #include "contiki.h"
 #include "sys/etimer.h"
 
-/* Structure representing a generic sensor inside a smart ICU device. */
+/* Structure representing a generic sensor inside a smart ICU monitor. */
 struct sensor {
   struct etimer sampling_timer;
   clock_time_t sampling_interval;

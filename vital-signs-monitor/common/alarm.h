@@ -14,7 +14,7 @@
  * the signal is reproduced continuously for a given time. While the signal stops automatically,
  * the state of the alarm stays set to "ON" until an explicit reset command is issued.
  * The activation and deactivation of the alarm system is visually signaled by the activation and
- * deactivation of the device's LEDs.
+ * deactivation of the monitor's LEDs.
  */
 
 #ifndef SMART_ICU_ALARM_H

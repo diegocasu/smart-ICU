@@ -24,7 +24,7 @@ clear_buffer(char *buffer, size_t size)
 }
 /*---------------------------------------------------------------------------*/
 void
-json_message_device_registration(char *message_buffer, size_t size, char *monitor_id)
+json_message_monitor_registration(char *message_buffer, size_t size, char *monitor_id)
 {
   clear_buffer(message_buffer, size);
   snprintf(message_buffer, size, "{\"monitorID\": \"%s\", \"registration\": true}", monitor_id);

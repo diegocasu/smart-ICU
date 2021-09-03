@@ -47,7 +47,7 @@
 
 /* MQTT command and telemetry topics. */
 #define MQTT_MONITOR_CMD_TOPIC_ALARM_STATE               "cmd/smartICU/%s/patient-state/alarm-state"
-#define MQTT_MONITOR_CMD_TOPIC_DEVICE_REGISTRATION       "cmd/smartICU/collector/device-registration"
+#define MQTT_MONITOR_CMD_TOPIC_MONITOR_REGISTRATION       "cmd/smartICU/collector/monitor-registration"
 #define MQTT_MONITOR_CMD_TOPIC_PATIENT_REGISTRATION      "cmd/smartICU/collector/patient-registration"
 #define MQTT_MONITOR_TELEMETRY_TOPIC_HEART_RATE          "telemetry/smartICU/%s/patient-state/heart-rate"
 #define MQTT_MONITOR_TELEMETRY_TOPIC_BLOOD_PRESSURE      "telemetry/smartICU/%s/patient-state/blood-pressure"
