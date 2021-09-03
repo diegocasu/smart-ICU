@@ -16,7 +16,6 @@
 #include "sys/log.h"
 #include "./sensor.h"
 #include "./utils/sensor-constants.h"
-#include "./utils/prng.h"
 
 #define LOG_MODULE "Blood pressure sensor"
 #define LOG_LEVEL LOG_LEVEL_BLOOD_PRESSURE_SENSOR
@@ -52,7 +51,7 @@ PROCESS_THREAD(blood_pressure_sensor_process, event, data)
              blood_pressure_sensor.subscriber->name);
 
     /* Initialize the blood pressure value. */
-    blood_pressure_sensor.last_sample = prng_rand(BLOOD_PRESSURE_LOWER_BOUND, BLOOD_PRESSURE_UPPER_BOUND);
+    blood_pressure_sensor.last_sample = sensor_rand_int(BLOOD_PRESSURE_LOWER_BOUND, BLOOD_PRESSURE_UPPER_BOUND);
     etimer_set(&blood_pressure_sensor.sampling_timer, blood_pressure_sensor.sampling_interval);
 
     while(true) {

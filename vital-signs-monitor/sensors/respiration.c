@@ -16,7 +16,6 @@
 #include "sys/log.h"
 #include "./sensor.h"
 #include "./utils/sensor-constants.h"
-#include "./utils/prng.h"
 
 #define LOG_MODULE "Respiration sensor"
 #define LOG_LEVEL LOG_LEVEL_RESPIRATION_SENSOR
@@ -52,7 +51,7 @@ PROCESS_THREAD(respiration_sensor_process, event, data)
              respiration_sensor.subscriber->name);
 
     /* Initialize the respiration value. */
-    respiration_sensor.last_sample = prng_rand(RESPIRATION_LOWER_BOUND, RESPIRATION_UPPER_BOUND);
+    respiration_sensor.last_sample = sensor_rand_int(RESPIRATION_LOWER_BOUND, RESPIRATION_UPPER_BOUND);
     etimer_set(&respiration_sensor.sampling_timer, respiration_sensor.sampling_interval);
 
     while(true) {

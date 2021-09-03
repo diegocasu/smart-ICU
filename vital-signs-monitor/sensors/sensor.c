@@ -10,16 +10,22 @@
  * @{
  */
 
+#include <stdlib.h>
 #include "./sensor.h"
-#include "./utils/prng.h"
 
+/*---------------------------------------------------------------------------*/
+int
+sensor_rand_int(int min, int max)
+{
+  return min + rand()/(RAND_MAX/(max - min + 1) + 1);
+}
 /*---------------------------------------------------------------------------*/
 int
 sensor_generate_sample(int starting_sample, int max_deviation, int lower_bound, int upper_bound)
 {
   int deviation, new_sample;
 
-  deviation = prng_rand((-1)*max_deviation, max_deviation);
+  deviation = sensor_rand_int((-1)*max_deviation, max_deviation);
   new_sample = starting_sample + deviation;
 
   if(new_sample < lower_bound) {

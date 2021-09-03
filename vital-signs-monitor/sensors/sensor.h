@@ -37,14 +37,28 @@ struct sensor {
 };
 
 /**
- * \brief                   Generate a new integer sample in the interval [<i>lower_bound</i>, <i>upper_bound</i>].
+ * \brief       Extract a pseudorandom integer number in the interval [min, max].
+ * \param min   The lower bound (inclusive) of the interval.
+ * \param max   The upper bound (inclusive) of the interval.
+ * \return      A a pseudorandom integer number in the interval [min, max].
+ *
+ *              The function extracts a pseudorandom integer number in the interval [min, max].
+ *              The implementation is based on the <code>rand()</code> function provided
+ *              by the standard library.
+ */
+int sensor_rand_int(int min, int max);
+
+/**
+ * \brief                   Generate a new integer sample in the interval [<i>lower_bound</i>, <i>upper_bound</i>],
+ *                          starting from a previous value.
  * \param starting_sample   The sample from which the new one will be derived.
  * \param max_deviation     The maximum deviation used to generate the new sample.
  * \param lower_bound       The lower bound (inclusive) of the interval.
  * \param upper_bound       The upper bound (inclusive) of the interval.
  * \return                  A new integer sample in the interval [<i>lower_bound</i>, <i>upper_bound</i>].
  *
- *                          Generate a new integer sample in the interval [<i>lower_bound</i>, <i>upper_bound</i>].
+ *                          Generate a new integer sample in the interval [<i>lower_bound</i>, <i>upper_bound</i>],
+ *                          starting from a previous value.
  *                          A new sample is derived from the last one by adding or subtracting a deviation,
  *                          respecting the upper and lower bounds of the interval.
  *                          The deviation is a random number in the interval [<i>-max_deviation</i>, <i>max_deviation</i>].

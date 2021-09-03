@@ -16,7 +16,6 @@
 #include "sys/log.h"
 #include "./sensor.h"
 #include "./utils/sensor-constants.h"
-#include "./utils/prng.h"
 
 #define LOG_MODULE "Heart rate sensor"
 #define LOG_LEVEL LOG_LEVEL_HEART_RATE_SENSOR
@@ -52,7 +51,7 @@ PROCESS_THREAD(heart_rate_sensor_process, event, data)
              heart_rate_sensor.subscriber->name);
 
     /* Initialize the heart rate value. */
-    heart_rate_sensor.last_sample = prng_rand(HEART_RATE_LOWER_BOUND, HEART_RATE_UPPER_BOUND);
+    heart_rate_sensor.last_sample = sensor_rand_int(HEART_RATE_LOWER_BOUND, HEART_RATE_UPPER_BOUND);
     etimer_set(&heart_rate_sensor.sampling_timer, heart_rate_sensor.sampling_interval);
 
     while(true) {

@@ -16,7 +16,6 @@
 #include "sys/log.h"
 #include "./sensor.h"
 #include "./utils/sensor-constants.h"
-#include "./utils/prng.h"
 
 #define LOG_MODULE "Temperature sensor"
 #define LOG_LEVEL LOG_LEVEL_TEMPERATURE_SENSOR
@@ -52,7 +51,7 @@ PROCESS_THREAD(temperature_sensor_process, event, data)
              temperature_sensor.subscriber->name);
 
     /* Initialize the temperature value. */
-    temperature_sensor.last_sample = prng_rand(TEMPERATURE_LOWER_BOUND, TEMPERATURE_UPPER_BOUND);
+    temperature_sensor.last_sample = sensor_rand_int(TEMPERATURE_LOWER_BOUND, TEMPERATURE_UPPER_BOUND);
     etimer_set(&temperature_sensor.sampling_timer, temperature_sensor.sampling_interval);
 
     while(true) {

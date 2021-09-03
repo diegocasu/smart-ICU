@@ -11,8 +11,6 @@
  */
 
 #include "contiki.h"
-#include "os/sys/node-id.h"
-#include "../sensors/utils/prng.h"
 #include "../sensors/heart-rate.h"
 #include "../sensors/blood-pressure.h"
 #include "../sensors/temperature.h"
@@ -82,7 +80,6 @@ sensors_cmd_sample_event(process_event_t event)
 void
 sensors_cmd_start_processes(void)
 {
-  prng_init(node_id);
   process_start(&heart_rate_sensor_process, NULL);
   process_start(&blood_pressure_sensor_process, NULL);
   process_start(&temperature_sensor_process, NULL);

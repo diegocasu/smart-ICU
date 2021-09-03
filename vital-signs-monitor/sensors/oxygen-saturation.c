@@ -16,7 +16,6 @@
 #include "sys/log.h"
 #include "./sensor.h"
 #include "./utils/sensor-constants.h"
-#include "./utils/prng.h"
 
 #define LOG_MODULE "Oxygen saturation sensor"
 #define LOG_LEVEL LOG_LEVEL_OXYGEN_SATURATION_SENSOR
@@ -52,7 +51,7 @@ PROCESS_THREAD(oxygen_saturation_sensor_process, event, data)
              oxygen_saturation_sensor.subscriber->name);
 
     /* Initialize the oxygen saturation value. */
-    oxygen_saturation_sensor.last_sample = prng_rand(OXYGEN_SATURATION_LOWER_BOUND, OXYGEN_SATURATION_UPPER_BOUND);
+    oxygen_saturation_sensor.last_sample = sensor_rand_int(OXYGEN_SATURATION_LOWER_BOUND, OXYGEN_SATURATION_UPPER_BOUND);
     etimer_set(&oxygen_saturation_sensor.sampling_timer, oxygen_saturation_sensor.sampling_interval);
 
     while(true) {
