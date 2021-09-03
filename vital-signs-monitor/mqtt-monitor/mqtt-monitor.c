@@ -9,7 +9,7 @@
  * \defgroup mqtt-monitor MQTT vital signs monitor
  * @{
  *
- * The mqtt-output-queue module provides a simulation of a vital signs monitor
+ * The mqtt-monitor module provides a simulation of a vital signs monitor
  * that uses the MQTT protocol to exchange data with a collector.
  */
 
@@ -589,6 +589,7 @@ handle_sensor_sample(process_event_t event, int sample)
     max_threshold = ALARM_TEMPERATURE_MAX_THRESHOLD;
     json_message_temperature_sample(monitor.output_buffers.temperature, MQTT_MONITOR_OUTPUT_BUFFER_SIZE, sample);
     publish(monitor.telemetry_topics.temperature, monitor.output_buffers.temperature);
+
   } else {
     LOG_ERR("Dropping a sample from an unhandled sensor process.\n");
     return;
