@@ -2,6 +2,7 @@ package it.unipi.smartICU;
 
 import com.google.gson.JsonParseException;
 import it.unipi.smartICU.analytics.TelemetryArchive;
+import it.unipi.smartICU.coap.CoapCollector;
 import it.unipi.smartICU.mqtt.MqttCollector;
 import it.unipi.smartICU.utils.Configuration;
 import it.unipi.smartICU.analytics.PatientHealthDeterioration;
@@ -68,10 +69,14 @@ public class Collector {
         MqttCollector mqttCollector = new MqttCollector(configuration, logger);
         mqttCollector.start();
 
-        //TODO: add CoAP collector.
+        logger.log(Level.INFO, "Instantiating the CoAP collector.");
+        CoapCollector coapCollector = new CoapCollector(configuration, logger);
+        coapCollector.start();
 
         logger.log(Level.INFO, "Scheduling the execution of the patient health deterioration routine.");
-        PatientHealthDeterioration healthDeteriorationTask = new PatientHealthDeterioration(logger, mqttCollector);
+        PatientHealthDeterioration healthDeteriorationTask = new PatientHealthDeterioration(logger,
+                                                                                            mqttCollector,
+                                                                                            coapCollector);
         scheduler.scheduleAtFixedRate(healthDeteriorationTask,
                                       configuration.getPatientHealthDeteriorationSchedulingRate(),
                                       configuration.getPatientHealthDeteriorationSchedulingRate(),

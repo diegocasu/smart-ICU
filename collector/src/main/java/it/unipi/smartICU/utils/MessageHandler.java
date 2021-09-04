@@ -18,10 +18,12 @@ public class MessageHandler {
      * @param logger              the logger used to write information about the handling.
      * @param registeredMonitors  the list of registered monitors.
      * @param jsonObject          the parsed JSON message.
+     * @return                    the monitor ID if the registration was successful,
+     *                            null otherwise.
      */
-    public static void handleMonitorRegistration(Logger logger,
-                                                 Map<String, VitalSignsMonitor> registeredMonitors,
-                                                 Map<String, Object> jsonObject)
+    public static String handleMonitorRegistration(Logger logger,
+                                                   Map<String, VitalSignsMonitor> registeredMonitors,
+                                                   Map<String, Object> jsonObject)
     {
         logger.log(Level.INFO, "Handling a monitor registration message.");
 
@@ -30,18 +32,18 @@ public class MessageHandler {
             Boolean registration = (Boolean) jsonObject.get("registration");
 
             if (!registration) {
-                logger.log(Level.INFO, String.format("Removed the registration of monitor %s.", monitorId));
-                registeredMonitors.remove(monitorId);
-                return;
+                logger.log(Level.INFO, "Removal of the registration is not supported.");
+                return null;
             }
 
             VitalSignsMonitor monitor = new VitalSignsMonitor(monitorId);
             registeredMonitors.put(monitorId, monitor); // If an old object with the same ID is present, it is replaced.
             logger.log(Level.INFO, String.format("Registered a new monitor with ID %s.", monitorId));
-            return;
+            return monitorId;
         }
 
         logger.log(Level.INFO, "Discarding the message: bad format.");
+        return null;
     }
 
     /**

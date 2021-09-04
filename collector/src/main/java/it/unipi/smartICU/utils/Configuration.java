@@ -17,6 +17,8 @@ public class Configuration {
     private final String filePath;
     private String mqttBrokerIpAddress;
     private int mqttBrokerPort;
+    private String coapCollectorIpAddress;
+    private int coapCollectorPort;
     private int patientHealthDeteriorationSchedulingRate;
 
     /**
@@ -30,6 +32,8 @@ public class Configuration {
 
         this.mqttBrokerIpAddress = parsedConfiguration.mqttBrokerIpAddress;
         this.mqttBrokerPort = parsedConfiguration.mqttBrokerPort;
+        this.coapCollectorIpAddress = parsedConfiguration.coapCollectorIpAddress;
+        this.coapCollectorPort = parsedConfiguration.coapCollectorPort;
         this.patientHealthDeteriorationSchedulingRate = parsedConfiguration.patientHealthDeteriorationSchedulingRate;
 
         reader.close();
@@ -56,6 +60,14 @@ public class Configuration {
 
     public int getMqttBrokerPort() {
         return mqttBrokerPort;
+    }
+
+    public String getCoapCollectorIpAddress() {
+        return coapCollectorIpAddress;
+    }
+
+    public int getCoapCollectorPort() {
+        return coapCollectorPort;
     }
 
     public int getPatientHealthDeteriorationSchedulingRate() {

@@ -1,5 +1,6 @@
 package it.unipi.smartICU.analytics;
 
+import it.unipi.smartICU.coap.CoapCollector;
 import it.unipi.smartICU.mqtt.MqttCollector;
 import it.unipi.smartICU.utils.DedicatedCollector;
 import it.unipi.smartICU.utils.VitalSignsMonitor;
@@ -20,6 +21,7 @@ import java.util.logging.Logger;
 public class PatientHealthDeterioration implements Runnable {
     private final Logger logger;
     private final MqttCollector mqttCollector;
+    private final CoapCollector coapCollector;
     private final Random rng;
 
     /**
@@ -47,9 +49,10 @@ public class PatientHealthDeterioration implements Runnable {
         }
     }
 
-    public PatientHealthDeterioration(Logger logger, MqttCollector mqttCollector) {
+    public PatientHealthDeterioration(Logger logger, MqttCollector mqttCollector, CoapCollector coapCollector) {
         this.logger = logger;
         this.mqttCollector = mqttCollector;
+        this.coapCollector = coapCollector;
         this.rng = new Random("smartICU".hashCode());
     }
 
@@ -57,6 +60,7 @@ public class PatientHealthDeterioration implements Runnable {
     public void run() {
         logger.log(Level.INFO, "Starting the patient health deterioration check.");
         healthDeteriorationCheck(mqttCollector);
+        healthDeteriorationCheck(coapCollector);
         logger.log(Level.INFO, "Ending the patient health deterioration check.");
     }
 }
