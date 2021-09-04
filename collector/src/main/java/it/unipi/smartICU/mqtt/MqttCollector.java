@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
 import it.unipi.smartICU.utils.Configuration;
+import it.unipi.smartICU.utils.DedicatedCollector;
 import it.unipi.smartICU.utils.MessageHandler;
 import it.unipi.smartICU.utils.VitalSignsMonitor;
 
@@ -26,7 +27,7 @@ import java.util.logging.Logger;
  * sends commands to monitors to turn on their alarm systems, if requested by the patient
  * health deterioration service.
  */
-public class MqttCollector implements MqttCallback {
+public class MqttCollector implements MqttCallback, DedicatedCollector {
     private final Logger logger;
     private final Configuration configuration;
     private MqttClient mqttClient;
@@ -44,13 +45,12 @@ public class MqttCollector implements MqttCallback {
         this.registeredMonitors = new HashMap<>();
     }
 
+    @Override
     public Map<String, VitalSignsMonitor> getRegisteredMonitors() {
         return registeredMonitors;
     }
 
-    /**
-     * Stops the MQTT collector.
-     */
+    @Override
     public void stop() {
         try {
             logger.log(Level.INFO, "Stopping the MQTT collector.");
@@ -64,6 +64,7 @@ public class MqttCollector implements MqttCallback {
     /**
      * Starts the MQTT collector and subscribes to the topics of interest.
      */
+    @Override
     public void start() {
         logger.log(Level.INFO, "Starting the MQTT collector.");
         String brokerURI = String.format("tcp://[%s]:%d",
@@ -90,10 +91,7 @@ public class MqttCollector implements MqttCallback {
         }
     }
 
-    /**
-     * Sends a command to turn on the alarm system of a monitor.
-     * @param monitorId  the monitor to which the command must be sent.
-     */
+    @Override
     public void turnOnAlarm(String monitorId) {
         String alarmMessage = "{\"alarm\": true}";
         String topic = String.format(Topic.TURN_ON_ALARM, monitorId);

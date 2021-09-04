@@ -1,6 +1,7 @@
 package it.unipi.smartICU.analytics;
 
 import it.unipi.smartICU.mqtt.MqttCollector;
+import it.unipi.smartICU.utils.DedicatedCollector;
 import it.unipi.smartICU.utils.VitalSignsMonitor;
 
 import java.util.Random;
@@ -21,18 +22,14 @@ public class PatientHealthDeterioration implements Runnable {
     private final MqttCollector mqttCollector;
     private final Random rng;
 
-    public PatientHealthDeterioration(Logger logger, MqttCollector mqttCollector) {
-        this.logger = logger;
-        this.mqttCollector = mqttCollector;
-        this.rng = new Random("smartICU".hashCode());
-    }
-
-    @Override
-    public void run() {
-        logger.log(Level.INFO, "Starting the patient health deterioration check.");
-
-        for (String monitorId : mqttCollector.getRegisteredMonitors().keySet()) {
-            VitalSignsMonitor monitor = mqttCollector.getRegisteredMonitors().get(monitorId);
+    /**
+     * Checks if the health of patients is deteriorating. The check involves
+     * the patients attached to the monitors registered to the given collector.
+     * @param collector  the collector holding the list of monitors.
+     */
+    private void healthDeteriorationCheck(DedicatedCollector collector ) {
+        for (String monitorId : collector.getRegisteredMonitors().keySet()) {
+            VitalSignsMonitor monitor = collector.getRegisteredMonitors().get(monitorId);
 
             // If the monitor has already the alarm turned on or has not a patient attached, it is skipped.
             if (monitor.getAlarm() || monitor.getPatientId().equals(""))
@@ -45,10 +42,21 @@ public class PatientHealthDeterioration implements Runnable {
                 logger.log(Level.INFO, String.format("Detected a health deterioration of patient %s attached to monitor %s.",
                                                      monitor.getPatientId(),
                                                      monitorId));
-                mqttCollector.turnOnAlarm(monitorId);
+                collector.turnOnAlarm(monitorId);
             }
         }
+    }
 
+    public PatientHealthDeterioration(Logger logger, MqttCollector mqttCollector) {
+        this.logger = logger;
+        this.mqttCollector = mqttCollector;
+        this.rng = new Random("smartICU".hashCode());
+    }
+
+    @Override
+    public void run() {
+        logger.log(Level.INFO, "Starting the patient health deterioration check.");
+        healthDeteriorationCheck(mqttCollector);
         logger.log(Level.INFO, "Ending the patient health deterioration check.");
     }
 }
