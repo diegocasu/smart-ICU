@@ -532,7 +532,15 @@ handle_button_press(button_hal_button_t *button)
     /* Clear the output queue, to avoid that old messages get assigned to the new patient. */
     mqtt_output_queue_init(&monitor.mqtt_module.output_queue);
 
+    /* Delete the patient ID in the monitor and in the collector. */
     memset(monitor.patient_id, 0, MQTT_MONITOR_PATIENT_ID_LENGTH);
+    json_message_patient_registration(monitor.output_buffers.patient_registration,
+                                      MQTT_MONITOR_OUTPUT_BUFFER_SIZE,
+                                      monitor.monitor_id,
+                                      monitor.patient_id);
+    publish(monitor.cmd_topics.patient_registration, monitor.output_buffers.patient_registration);
+
+    /* Stop the sampling activity of the sensors. */
     sensors_cmd_stop_sampling();
 
     monitor.state = MQTT_MONITOR_STATE_WAITING_PATIENT_ID;

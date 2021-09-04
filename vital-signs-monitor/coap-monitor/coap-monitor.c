@@ -249,8 +249,12 @@ handle_button_press(button_hal_button_t *button)
 
   if(button->press_duration_seconds == COAP_MONITOR_RESET_PATIENT_ID_DURATION) {
     LOG_INFO("Resetting the patient ID.\n");
-
     memset(monitor.patient_id, 0, COAP_MONITOR_PATIENT_ID_LENGTH);
+
+    /* Update the patient ID resource. */
+    res_registered_patient_update(monitor.patient_id);
+
+    /* Stop the sampling activity of the sensors. */
     sensors_cmd_stop_sampling();
 
     monitor.state = COAP_MONITOR_STATE_WAITING_PATIENT_ID;
