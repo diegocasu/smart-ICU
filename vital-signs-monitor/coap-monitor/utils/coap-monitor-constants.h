@@ -31,6 +31,7 @@
 #define COAP_MONITOR_NETWORK_CHECK_INTERVAL                   1  /* Interval in seconds used by the periodic timer to check
                                                                    if the network connectivity has been established. */
 #define COAP_MONITOR_OUTPUT_BUFFER_SIZE                       256 /* Size of the CoAP output buffer. */
+#define COAP_MONITOR_INPUT_BUFFER_SIZE                        32  /* Size of the CoaAP input buffer. */
 #define COAP_MONITOR_PATIENT_ID_LENGTH                        10 /* The maximum length of a patient ID. */
 #define COAP_MONITOR_RESET_PATIENT_ID_DURATION                10 /* Time in seconds for which the button must be kept pressed to reset the patient ID. */
 #define COAP_MONITOR_RESET_ALARM_DURATION                     5  /* Time in seconds for which the button must be kept pressed to reset the alarm state. */

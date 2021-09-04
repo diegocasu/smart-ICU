@@ -70,13 +70,12 @@ put_handler(coap_message_t *request, coap_message_t *response, uint8_t *buffer,
             uint16_t preferred_size, int32_t *offset)
 {
   const uint8_t *request_payload = NULL;
-  char turn_on_alarm_msg[COAP_MONITOR_RESOURCE_OUTPUT_BUFFER_SIZE];
-  char turn_off_alarm_msg[COAP_MONITOR_RESOURCE_OUTPUT_BUFFER_SIZE];
-
+  char turn_on_alarm_msg[COAP_MONITOR_INPUT_BUFFER_SIZE];
+  char turn_off_alarm_msg[COAP_MONITOR_INPUT_BUFFER_SIZE];
 
   LOG_DBG("Handling a PUT request.\n");
-  json_message_alarm_started(turn_on_alarm_msg, COAP_MONITOR_RESOURCE_OUTPUT_BUFFER_SIZE);
-  json_message_alarm_started(turn_off_alarm_msg, COAP_MONITOR_RESOURCE_OUTPUT_BUFFER_SIZE);
+  json_message_alarm_started(turn_on_alarm_msg, COAP_MONITOR_INPUT_BUFFER_SIZE);
+  json_message_alarm_started(turn_off_alarm_msg, COAP_MONITOR_INPUT_BUFFER_SIZE);
   coap_get_payload(request, &request_payload);
 
   if(strcmp(turn_on_alarm_msg, (const char*)request_payload) == 0) {
