@@ -263,7 +263,7 @@ handle_mqtt_event_publish(struct mqtt_message *msg)
     return;
   }
 
-  json_message_alarm_started(start_alarm_msg, MQTT_MONITOR_OUTPUT_BUFFER_SIZE);
+  json_message_alarm_started(start_alarm_msg, MQTT_MONITOR_INPUT_BUFFER_SIZE);
   if(strcmp(start_alarm_msg, (char*)msg->payload_chunk) == 0) {
     LOG_INFO("Starting the alarm.\n");
     alarm_start(&monitor.alarm); /* There is no need to notify the collector about the state change. */
