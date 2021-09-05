@@ -14,6 +14,7 @@
 #include "os/sys/log.h"
 #include "os/net/app-layer/coap/coap-engine.h"
 #include "../../common/json-message.h"
+#include "../../sensors/utils/sensor-constants.h"
 #include "../utils/coap-monitor-constants.h"
 #include "./res-heart-rate.h"
 
@@ -52,6 +53,8 @@ get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buffer,
   memcpy(buffer, message, length);
   coap_set_header_content_format(response, APPLICATION_JSON);
   coap_set_header_etag(response, (uint8_t *)&length, 1);
+  coap_set_option(response, COAP_OPTION_MAX_AGE);
+  coap_set_header_max_age(response, HEART_RATE_SAMPLING_INTERVAL);
   coap_set_payload(response, buffer, length);
   coap_set_status_code(response, CONTENT_2_05);
 }
