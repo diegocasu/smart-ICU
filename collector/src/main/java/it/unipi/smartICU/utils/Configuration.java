@@ -19,6 +19,11 @@ public class Configuration {
     private int mqttBrokerPort;
     private String coapCollectorIpAddress;
     private int coapCollectorPort;
+    private String telemetryArchiveIpAddress;
+    private int telemetryArchivePort;
+    private String telemetryArchiveUser;
+    private String telemetryArchivePassword;
+    private String telemetryArchiveDatabaseName;
     private int patientHealthDeteriorationSchedulingRate;
 
     /**
@@ -34,6 +39,11 @@ public class Configuration {
         this.mqttBrokerPort = parsedConfiguration.mqttBrokerPort;
         this.coapCollectorIpAddress = parsedConfiguration.coapCollectorIpAddress;
         this.coapCollectorPort = parsedConfiguration.coapCollectorPort;
+        this.telemetryArchiveIpAddress = parsedConfiguration.telemetryArchiveIpAddress;
+        this.telemetryArchivePort = parsedConfiguration.telemetryArchivePort;
+        this.telemetryArchiveUser = parsedConfiguration.telemetryArchiveUser;
+        this.telemetryArchivePassword = parsedConfiguration.telemetryArchivePassword;
+        this.telemetryArchiveDatabaseName = parsedConfiguration.telemetryArchiveDatabaseName;
         this.patientHealthDeteriorationSchedulingRate = parsedConfiguration.patientHealthDeteriorationSchedulingRate;
 
         reader.close();
@@ -68,6 +78,26 @@ public class Configuration {
 
     public int getCoapCollectorPort() {
         return coapCollectorPort;
+    }
+
+    public String getTelemetryArchiveIpAddress() {
+        return telemetryArchiveIpAddress;
+    }
+
+    public int getTelemetryArchivePort() {
+        return telemetryArchivePort;
+    }
+
+    public String getTelemetryArchiveUser() {
+        return telemetryArchiveUser;
+    }
+
+    public String getTelemetryArchivePassword() {
+        return telemetryArchivePassword;
+    }
+
+    public String getTelemetryArchiveDatabaseName() {
+        return telemetryArchiveDatabaseName;
     }
 
     public int getPatientHealthDeteriorationSchedulingRate() {

@@ -62,8 +62,9 @@ public class Collector {
      * the periodic service to check the patient health deterioration.
      */
     public void start() {
-        logger.log(Level.INFO, "Initializing the telemetry database.");
-        TelemetryArchive.init(configuration);
+        logger.log(Level.INFO, "Initializing the connection to the telemetry database.");
+        if (!TelemetryArchive.init(configuration, logger))
+            return;
 
         logger.log(Level.INFO, "Instantiating the MQTT collector.");
         MqttCollector mqttCollector = new MqttCollector(configuration, logger);

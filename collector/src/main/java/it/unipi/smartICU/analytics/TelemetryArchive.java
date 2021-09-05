@@ -2,6 +2,16 @@ package it.unipi.smartICU.analytics;
 
 import it.unipi.smartICU.utils.Configuration;
 import it.unipi.smartICU.utils.SensorType;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  * Class representing the telemetry data archive for the smart ICU service.
@@ -9,13 +19,53 @@ import it.unipi.smartICU.utils.SensorType;
  * received from the smart ICU monitors.
  */
 public class TelemetryArchive {
+    private static Logger logger;
+    private static String url;
+    private static String username;
+    private static String password;
 
     /**
-     * Creates a new <code>TelemetryArchive</code>.
+     * Initializes the telemetry archive.
      * @param configuration  the configuration for the telemetry archive.
+     * @return               true if the connection to the database was successful,
+     *                       false otherwise.
      */
-    public static void init(Configuration configuration) {
-        //TODO: store configuration parameters to connect to the database.
+    public static boolean init(Configuration configuration, Logger logger) {
+        TelemetryArchive.logger = logger;
+        username = configuration.getTelemetryArchiveUser();
+        password = configuration.getTelemetryArchivePassword();
+        url = String.format("jdbc:mysql://%s:%s/%s",
+                            configuration.getTelemetryArchiveIpAddress(),
+                            configuration.getTelemetryArchivePort(),
+                            configuration.getTelemetryArchiveDatabaseName());
+
+        /*
+         * Test connection to the database and create tables
+         * for telemetry data, if not already present.
+         */
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS %s (" +
+                                  "sample_id INT UNSIGNED NOT NULL AUTO_INCREMENT, " +
+                                  "sample FLOAT NOT NULL, " +
+                                  "unit VARCHAR(30) NOT NULL, " +
+                                  "timestamp VARCHAR(50) NOT NULL, " +
+                                  "patient_id VARCHAR(45) NOT NULL, " +
+                                  "monitor_id VARCHAR(45) NOT NULL, " +
+                                  "PRIMARY KEY (sample_id)) " +
+                                  "ENGINE = InnoDB;";
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             Statement statement = connection.createStatement()) {
+            TelemetryArchive.logger.log(Level.INFO, "Connected to the telemetry database.");
+
+            for (SensorType sensor : SensorType.values())
+                statement.executeUpdate(String.format(createTableQuery, sensor.name().toLowerCase()));
+
+            return true;
+        } catch (SQLException exception) {
+            TelemetryArchive.logger.log(Level.INFO, "Failed to connect to the telemetry database.");
+            TelemetryArchive.logger.log(Level.FINE, ExceptionUtils.getStackTrace(exception));
+            return false;
+        }
     }
 
     /**
@@ -24,8 +74,33 @@ public class TelemetryArchive {
      * @param sample     the sample produced by the sensor.
      * @param unit       the measurement unit of the sample.
      * @param timestamp  the timestamp of the sample.
+     * @param monitorId  the ID of the monitor that produced the sample.
+     * @param patientID  the ID of the patient attached to the monitor.
      */
-    public static void save(SensorType sensor, float sample, String unit, float timestamp) {
-        //TODO: connect to the database and save the sample.
+    public static void save(SensorType sensor, float sample, String unit, float timestamp,
+                            String monitorId, String patientID)
+    {
+        TelemetryArchive.logger.log(Level.INFO, "Saving the sample into the database.");
+        String insertSampleQuery = "INSERT INTO %s (sample_id, sample, unit, timestamp, patient_id, monitor_id) " +
+                                   "VALUES (NULL, %f, \"%s\", \"%s\", \"%s\", \"%s\");";
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             Statement statement = connection.createStatement()) {
+            int insertedRows = statement.executeUpdate(String.format(Locale.US,
+                                                                     insertSampleQuery,
+                                                                     sensor.name().toLowerCase(),
+                                                                     sample,
+                                                                     unit,
+                                                                     timestamp,
+                                                                     patientID,
+                                                                     monitorId));
+            if (insertedRows != 0)
+                TelemetryArchive.logger.log(Level.INFO, "Sample saved successfully.");
+            else
+                TelemetryArchive.logger.log(Level.INFO, "An error occurred while saving the sample.");
+        } catch (SQLException exception) {
+            logger.log(Level.INFO, "Error: failed to connect to the telemetry database.");
+            logger.log(Level.FINE, ExceptionUtils.getStackTrace(exception));
+        }
     }
 }

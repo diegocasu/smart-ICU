@@ -197,7 +197,8 @@ public class MessageHandler {
             if (sensor != null) {
                 String unit = (String) jsonObject.get("unit");
                 float timestamp = Float.parseFloat(jsonObject.get("timestamp").toString());
-                TelemetryArchive.save(sensor, sample, unit, timestamp);
+                TelemetryArchive.save(sensor, sample, unit, timestamp, monitorId,
+                                      registeredMonitors.get(monitorId).getPatientId());
                 return;
             }
         }
