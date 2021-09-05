@@ -35,4 +35,7 @@
 #undef UIP_CONF_BUFFER_SIZE
 #define UIP_CONF_BUFFER_SIZE 240
 
+/* Enable automatic configuration of the patient ID. */
+// #define AUTOMATIC_PATIENT_ID_CONFIGURATION
+
 #endif /* __PROJECT_CONF_H */

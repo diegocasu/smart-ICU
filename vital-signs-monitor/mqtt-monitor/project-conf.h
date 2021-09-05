@@ -17,4 +17,7 @@
 /* Enable TCP. */
 #define UIP_CONF_TCP 1
 
+/* Enable automatic configuration of the patient ID. */
+// #define AUTOMATIC_PATIENT_ID_CONFIGURATION
+
 #endif /* __PROJECT_CONF_H */

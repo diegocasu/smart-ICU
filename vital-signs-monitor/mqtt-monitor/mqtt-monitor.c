@@ -249,6 +249,35 @@ retry_message_transmission()
 }
 /*---------------------------------------------------------------------------*/
 /**
+ * \brief   Handle the reception of a new patient ID on the serial line.
+ *
+ *          The function handles the reception of a new patient ID
+ *          on the serial line, sending a registration message to
+ *          the collector and restarting the sampling activity
+ *          of the sensor processes. It changes the
+ *          monitor state to MQTT_MONITOR_STATE_OPERATIONAL.
+ */
+static void
+handle_new_patient_ID(char *patient_id)
+{
+  memcpy(monitor.patient_id, patient_id, MQTT_MONITOR_PATIENT_ID_LENGTH);
+  monitor.patient_id[MQTT_MONITOR_PATIENT_ID_LENGTH - 1] = '\0';
+  LOG_INFO("New patient ID: %s.\n", monitor.patient_id);
+
+  /* Register the new patient ID sending a message to the collector. */
+  json_message_patient_registration(monitor.output_buffers.patient_registration,
+                                    MQTT_MONITOR_OUTPUT_BUFFER_SIZE,
+                                    monitor.monitor_id,
+                                    monitor.patient_id);
+  publish(monitor.cmd_topics.patient_registration, monitor.output_buffers.patient_registration);
+
+  /* Start the sampling activity of the sensors. */
+  sensors_cmd_start_sampling(&mqtt_vital_signs_monitor);
+
+  monitor.state = MQTT_MONITOR_STATE_OPERATIONAL;
+}
+/*---------------------------------------------------------------------------*/
+/**
  * \brief   Handle the publishing of an MQTT message to the subscribed topic.
  */
 static void
@@ -467,35 +496,13 @@ handle_state_subscribed(void)
    */
   monitor.state = MQTT_MONITOR_STATE_WAITING_PATIENT_ID;
   LOG_INFO("Waiting for a new patient ID on the serial line.\n");
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief   Handle the reception of a new patient ID on the serial line.
- *
- *          The function handles the reception of a new patient ID
- *          on the serial line, sending a registration message to
- *          the collector and restarting the sampling activity
- *          of the sensor processes. It changes the
- *          monitor state to MQTT_MONITOR_STATE_OPERATIONAL.
- */
-static void
-handle_new_patient_ID(char *patient_id)
-{
-  memcpy(monitor.patient_id, patient_id, MQTT_MONITOR_PATIENT_ID_LENGTH);
-  monitor.patient_id[MQTT_MONITOR_PATIENT_ID_LENGTH - 1] = '\0';
-  LOG_INFO("New patient ID: %s.\n", monitor.patient_id);
 
-  /* Register the new patient ID sending a message to the collector. */
-  json_message_patient_registration(monitor.output_buffers.patient_registration,
-                                    MQTT_MONITOR_OUTPUT_BUFFER_SIZE,
-                                    monitor.monitor_id,
-                                    monitor.patient_id);
-  publish(monitor.cmd_topics.patient_registration, monitor.output_buffers.patient_registration);
-
-  /* Start the sampling activity of the sensors. */
-  sensors_cmd_start_sampling(&mqtt_vital_signs_monitor);
-
-  monitor.state = MQTT_MONITOR_STATE_OPERATIONAL;
+#ifdef AUTOMATIC_PATIENT_ID_CONFIGURATION
+  LOG_INFO("Automatic configuration of the new patient ID.\n");
+  char random_patient_ID[MQTT_MONITOR_PATIENT_ID_LENGTH];
+  snprintf(random_patient_ID, MQTT_MONITOR_PATIENT_ID_LENGTH, "auto_%d", rand());
+  handle_new_patient_ID(random_patient_ID);
+#endif
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -545,6 +552,13 @@ handle_button_press(button_hal_button_t *button)
 
     monitor.state = MQTT_MONITOR_STATE_WAITING_PATIENT_ID;
     LOG_INFO("Waiting for a new patient ID on the serial line.\n");
+
+#ifdef AUTOMATIC_PATIENT_ID_CONFIGURATION
+    LOG_INFO("Automatic configuration of the new patient ID.\n");
+    char random_patient_ID[MQTT_MONITOR_PATIENT_ID_LENGTH];
+    snprintf(random_patient_ID, MQTT_MONITOR_PATIENT_ID_LENGTH, "auto_%d", rand());
+    handle_new_patient_ID(random_patient_ID);
+#endif
   }
 }
 /*---------------------------------------------------------------------------*/

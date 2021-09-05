@@ -159,6 +159,31 @@ handle_state_network_ready()
 }
 /*---------------------------------------------------------------------------*/
 /**
+ * \brief   Handle the reception of a new patient ID on the serial line.
+ *
+ *          The function handles the reception of a new patient ID
+ *          on the serial line, updating the relative resource
+ *          and restarting the sampling activity
+ *          of the sensor processes. It changes the
+ *          monitor state to COAP_MONITOR_STATE_OPERATIONAL.
+ */
+static void
+handle_new_patient_ID(char *patient_id)
+{
+  memcpy(monitor.patient_id, patient_id, COAP_MONITOR_PATIENT_ID_LENGTH);
+  monitor.patient_id[COAP_MONITOR_PATIENT_ID_LENGTH - 1] = '\0';
+  LOG_INFO("New patient ID: %s.\n", monitor.patient_id);
+
+  /* Update the patient ID resource. */
+  res_registered_patient_update(monitor.patient_id);
+
+  /* Start the sampling activity of the sensors. */
+  sensors_cmd_start_sampling(&coap_vital_signs_monitor);
+
+  monitor.state = COAP_MONITOR_STATE_OPERATIONAL;
+}
+/*---------------------------------------------------------------------------*/
+/**
  * \brief   Handle the CoAP message sent by the collector in response to
  *          the monitor registration message.
  *
@@ -193,31 +218,13 @@ handle_registration_response(coap_message_t *response)
 
   monitor.state = COAP_MONITOR_STATE_WAITING_PATIENT_ID;
   LOG_INFO("Waiting for a new patient ID on the serial line.\n");
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief   Handle the reception of a new patient ID on the serial line.
- *
- *          The function handles the reception of a new patient ID
- *          on the serial line, updating the relative resource
- *          and restarting the sampling activity
- *          of the sensor processes. It changes the
- *          monitor state to COAP_MONITOR_STATE_OPERATIONAL.
- */
-static void
-handle_new_patient_ID(char *patient_id)
-{
-  memcpy(monitor.patient_id, patient_id, COAP_MONITOR_PATIENT_ID_LENGTH);
-  monitor.patient_id[COAP_MONITOR_PATIENT_ID_LENGTH - 1] = '\0';
-  LOG_INFO("New patient ID: %s.\n", monitor.patient_id);
 
-  /* Update the patient ID resource. */
-  res_registered_patient_update(monitor.patient_id);
-
-  /* Start the sampling activity of the sensors. */
-  sensors_cmd_start_sampling(&coap_vital_signs_monitor);
-
-  monitor.state = COAP_MONITOR_STATE_OPERATIONAL;
+#ifdef AUTOMATIC_PATIENT_ID_CONFIGURATION
+  LOG_INFO("Automatic configuration of the new patient ID.\n");
+  char random_patient_ID[COAP_MONITOR_PATIENT_ID_LENGTH];
+  snprintf(random_patient_ID, COAP_MONITOR_PATIENT_ID_LENGTH, "auto_%d", rand());
+  handle_new_patient_ID(random_patient_ID);
+#endif
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -259,6 +266,13 @@ handle_button_press(button_hal_button_t *button)
 
     monitor.state = COAP_MONITOR_STATE_WAITING_PATIENT_ID;
     LOG_INFO("Waiting for a new patient ID on the serial line.\n");
+
+#ifdef AUTOMATIC_PATIENT_ID_CONFIGURATION
+    LOG_INFO("Automatic configuration of the new patient ID.\n");
+    char random_patient_ID[COAP_MONITOR_PATIENT_ID_LENGTH];
+    snprintf(random_patient_ID, COAP_MONITOR_PATIENT_ID_LENGTH, "auto_%d", rand());
+    handle_new_patient_ID(random_patient_ID);
+#endif
   }
 }
 /*---------------------------------------------------------------------------*/
