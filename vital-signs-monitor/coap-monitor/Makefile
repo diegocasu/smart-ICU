@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = mqtt-monitor
+CONTIKI_PROJECT = coap-monitor
 all: $(CONTIKI_PROJECT)
 
 CONTIKI = ../../../..
