@@ -15,6 +15,10 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -33,6 +37,33 @@ public class MqttCollector implements MqttCallback, DedicatedCollector {
     private MqttClient mqttClient;
     private final Map<String, VitalSignsMonitor> registeredMonitors;
     private final String CLIENT_ID = "collector";
+
+    /**
+     * Generates the URI of the broker using the available configuration.
+     * @return  the URI of the broker.
+     */
+    private String generateBrokerURI() {
+        InetAddress address;
+
+        try {
+            address = InetAddress.getByName(configuration.getMqttBrokerIpAddress());
+        } catch (UnknownHostException exception) {
+            logger.log(Level.FINE, ExceptionUtils.getStackTrace(exception));
+            return null;
+        }
+
+        if (address instanceof Inet4Address)
+            return String.format("tcp://%s:%d",
+                                 configuration.getMqttBrokerIpAddress(),
+                                 configuration.getMqttBrokerPort());
+
+        if (address instanceof Inet6Address)
+            return String.format("tcp://[%s]:%d",
+                                 configuration.getMqttBrokerIpAddress(),
+                                 configuration.getMqttBrokerPort());
+
+        return null;
+    }
 
     /**
      * Creates a new <code>MqttCollector</code>.
@@ -67,9 +98,7 @@ public class MqttCollector implements MqttCallback, DedicatedCollector {
     @Override
     public void start() {
         logger.log(Level.INFO, "Starting the MQTT collector.");
-        String brokerURI = String.format("tcp://[%s]:%d",
-                                         configuration.getMqttBrokerIpAddress(),
-                                         configuration.getMqttBrokerPort());
+        String brokerURI = generateBrokerURI();
 
         try {
             logger.log(Level.INFO, String.format("Attempting to connect to the broker %s.", brokerURI));
