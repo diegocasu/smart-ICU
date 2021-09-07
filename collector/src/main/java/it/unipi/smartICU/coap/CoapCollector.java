@@ -5,16 +5,22 @@ import it.unipi.smartICU.utils.Configuration;
 
 import it.unipi.smartICU.utils.DedicatedCollector;
 import it.unipi.smartICU.utils.VitalSignsMonitor;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.network.CoapEndpoint;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 /**
  * Class representing a CoAP collector for the smart ICU service.
@@ -64,9 +70,25 @@ public class CoapCollector extends CoapServer implements DedicatedCollector {
     @Override
     public void turnOnAlarm(String monitorId) {
         String alarmMessage = "{\"alarm\": true}";
-        alarmCommandsClient.setURI(String.format("coap://[%s]:%s/patientState/alarmState",
-                                                 registeredMonitors.get(monitorId).getIpAddress(),
-                                                 registeredMonitors.get(monitorId).getPort()));
+        InetAddress address;
+
+        try {
+            address = InetAddress.getByName(registeredMonitors.get(monitorId).getIpAddress());
+        } catch (UnknownHostException exception) {
+            logger.log(Level.INFO, String.format("Impossible to issue the PUT: the address %s of the monitor is malformed.",
+                                                 registeredMonitors.get(monitorId).getIpAddress()));
+            logger.log(Level.FINE, ExceptionUtils.getStackTrace(exception));
+            return;
+        }
+
+        if (address instanceof Inet4Address)
+            alarmCommandsClient.setURI(String.format("coap://%s:%s/patientState/alarmState",
+                                                     registeredMonitors.get(monitorId).getIpAddress(),
+                                                     registeredMonitors.get(monitorId).getPort()));
+        else if (address instanceof Inet6Address)
+            alarmCommandsClient.setURI(String.format("coap://[%s]:%s/patientState/alarmState",
+                                                     registeredMonitors.get(monitorId).getIpAddress(),
+                                                     registeredMonitors.get(monitorId).getPort()));
 
         logger.log(Level.INFO, String.format("Issuing a PUT to %s, with payload %s.", alarmCommandsClient.getURI(), alarmMessage));
         alarmCommandsClient.put(alarmMessage, MediaTypeRegistry.APPLICATION_JSON);;
