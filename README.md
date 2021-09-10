@@ -50,8 +50,7 @@ in a single machine:
     "patientHealthDeteriorationSchedulingRate": 60
   }
   ```
-  where ```patientHealthDeteriorationSchedulingRate``` is expressed in seconds. 
-
+  where ```patientHealthDeteriorationSchedulingRate``` is expressed in seconds.  
   If the ports used by the MQTT broker and the CoAP collector are not 1883 and 5683 respectively,
   change them accordingly in the files ```vital-signs-monitor/mqtt-monitor/utils/mqtt-monitor-constants.h```
   and ```vital-signs-monitor/coap-monitor/utils/coap-monitor-constants.h```.
