@@ -11,11 +11,11 @@
  */
 
 #include "contiki.h"
-#include "../sensors/heart-rate.h"
-#include "../sensors/blood-pressure.h"
-#include "../sensors/temperature.h"
-#include "../sensors/respiration.h"
-#include "../sensors/oxygen-saturation.h"
+#include "./sensors/heart-rate.h"
+#include "./sensors/blood-pressure.h"
+#include "./sensors/temperature.h"
+#include "./sensors/respiration.h"
+#include "./sensors/oxygen-saturation.h"
 #include "./sensors-cmd.h"
 
 /*---------------------------------------------------------------------------*/

@@ -14,7 +14,7 @@
 #include "os/sys/log.h"
 #include "os/net/app-layer/coap/coap-engine.h"
 #include "../../common/json-message.h"
-#include "../../sensors/utils/sensor-constants.h"
+#include "../../common/sensors/utils/sensor-constants.h"
 #include "../utils/coap-monitor-constants.h"
 #include "./res-blood-pressure.h"
 

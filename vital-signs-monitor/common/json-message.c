@@ -14,7 +14,7 @@
 #include <string.h>
 #include "os/sys/clock.h"
 #include "json-message.h"
-#include "../sensors/utils/sensor-constants.h"
+#include "./sensors/utils/sensor-constants.h"
 
 /*---------------------------------------------------------------------------*/
 static void
