@@ -1,11 +1,20 @@
 package it.unipi.smartICU;
 
 import com.google.gson.JsonParseException;
+
 import it.unipi.smartICU.analytics.TelemetryArchive;
 import it.unipi.smartICU.coap.CoapCollector;
 import it.unipi.smartICU.mqtt.MqttCollector;
 import it.unipi.smartICU.utils.Configuration;
 import it.unipi.smartICU.analytics.PatientHealthDeterioration;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
@@ -92,7 +101,24 @@ public class Collector {
      * @throws JsonParseException  if the configuration file contains an invalid JSON syntax.
      */
     public static void main(String[] args) throws IOException {
-        Configuration configuration = new Configuration(args[0]);
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd;
+        Options options = new Options();
+
+        Option configurationOption = new Option("c", "configuration", true, "Configuration file path");
+        configurationOption.setRequired(true);
+        options.addOption(configurationOption);
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException exception) {
+            System.out.println(exception.getMessage());
+            formatter.printHelp("smartICU collector", options);
+            return;
+        }
+
+        Configuration configuration = new Configuration(cmd.getOptionValue("configuration"));
         Collector collector = new Collector(configuration);
         collector.start();
     }
