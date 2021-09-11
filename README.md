@@ -17,7 +17,7 @@ The repository is organised in the following way:
 
 ## Requirements
 - The [Contiki-NG](https://github.com/contiki-ng/contiki-ng) OS, together with the Cooja simulator.
-- Java 8 and Maven installed in the node that will run the collector.
+- Java 8 and Maven installed in the node that will execute the collector.
 - An MQTT broker (for example ```mosquitto```).
 - A MySQL database.
 
@@ -33,7 +33,8 @@ in a single machine:
   mvn clean install
   ```
 - Run the MQTT broker.
-- Run MySQL and create a schema dedicated to this project, for example called ```smartICU```.
+- Import the MySQL database contained in ```smartICU_db.sql``` or create a new one from scratch
+  dedicated to this project.
 - Prepare a JSON configuration file for the collector, for example called ```configuration.json```,
   with the following structure:
   ```
@@ -46,7 +47,7 @@ in a single machine:
     "telemetryArchivePort": 3306,
     "telemetryArchiveUser": "yourUser",
     "telemetryArchivePassword": "yourPassword",
-    "telemetryArchiveDatabaseName": "yourSchema",
+    "telemetryArchiveDatabaseName": "yourDatabase",
     "patientHealthDeteriorationSchedulingRate": 60
   }
   ```
